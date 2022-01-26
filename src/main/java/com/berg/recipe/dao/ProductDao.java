@@ -24,20 +24,20 @@ public class ProductDao implements Dao<Long, Product> {
     private static final String UPDATE_SQL = """
             UPDATE recipe_book.public.product
             SET name = ?,
-            proteins = ?,
-            fats = ?,
-            carbohydrates = ?,
-            type = ?
+                proteins = ?,
+                fats = ?,
+                carbohydrates = ?,
+                type = ?
             WHERE id = ?
             """;
 
     private static final String FIND_ALL_SQL = """
             SELECT id,
-            name,
-            proteins,
-            fats,
-            carbohydrates,
-            type
+                name,
+                proteins,
+                fats,
+                carbohydrates,
+                type
             FROM recipe_book.public.product
             """;
 
@@ -45,39 +45,43 @@ public class ProductDao implements Dao<Long, Product> {
             WHERE id = ?;
             """;
 
-    private ProductDao(){
+    private ProductDao() {
     }
 
     @SneakyThrows
-    public List<Product> findAll(){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(FIND_ALL_SQL);
-        var resultSet = preparedStatement.executeQuery();
-        List<Product> productList = new ArrayList<>();
-        while (resultSet.next()){
-            productList.add(buildProduct(resultSet));
+    public List<Product> findAll() {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(FIND_ALL_SQL)) {
+            var resultSet = preparedStatement.executeQuery();
+            List<Product> productList = new ArrayList<>();
+            while (resultSet.next()) {
+                productList.add(buildProduct(resultSet));
+            }
+            return productList;
         }
-        return productList;
     }
 
-    @SneakyThrows
-    public Optional<Product> findById(Long id){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL);
-        preparedStatement.setLong(1, id);
+//todo сделать запрос - вернуть все продукты по recipe_id
 
-        var resultSet = preparedStatement.executeQuery();
-        Product product = null;
-        if (resultSet.next()){
-            product = buildProduct(resultSet);
+    @SneakyThrows
+    public Optional<Product> findById(Long id) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+            preparedStatement.setLong(1, id);
+
+            var resultSet = preparedStatement.executeQuery();
+            Product product = null;
+            if (resultSet.next()) {
+                product = buildProduct(resultSet);
+            }
+            return Optional.ofNullable(product);
         }
-        return Optional.ofNullable(product);
     }
 
 
     @SneakyThrows
-    private Product buildProduct (ResultSet resultSet){
-        return  new Product(
+    private Product buildProduct(ResultSet resultSet) {
+        return new Product(
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 resultSet.getInt("proteins"),
@@ -88,46 +92,48 @@ public class ProductDao implements Dao<Long, Product> {
     }
 
     @SneakyThrows
-    public void update (Product product){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(UPDATE_SQL);
-        preparedStatement.setString(1, product.getName());
-        preparedStatement.setInt(2, product.getProteins());
-        preparedStatement.setInt(3, product.getFats());
-        preparedStatement.setInt(4, product.getCarbohydrates());
-        preparedStatement.setString(5, product.getType());
+    public void update(Product product) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
+            preparedStatement.setString(1, product.getName());
+            preparedStatement.setInt(2, product.getProteins());
+            preparedStatement.setInt(3, product.getFats());
+            preparedStatement.setInt(4, product.getCarbohydrates());
+            preparedStatement.setString(5, product.getType());
 
-        preparedStatement.executeUpdate();
-    }
-
-    @SneakyThrows
-    public Product save (Product product){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(SAVE_SQL);
-        preparedStatement.setString(1, product.getName());
-        preparedStatement.setInt(2, product.getProteins());
-        preparedStatement.setInt(3, product.getFats());
-        preparedStatement.setInt(4, product.getCarbohydrates());
-        preparedStatement.setString(5, product.getType());
-        preparedStatement.executeUpdate();
-
-        var generatedKeys = preparedStatement.getGeneratedKeys();
-        if (generatedKeys.next()){
-            product.setId(generatedKeys.getLong("id"));
+            preparedStatement.executeUpdate();
         }
-        return product;
-
     }
 
     @SneakyThrows
-    public boolean delete (Long id){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(DELETE_SQL);
-        preparedStatement.setLong(1, id);
-        return preparedStatement.executeUpdate() > 0;
+    public Product save(Product product) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(SAVE_SQL)) {
+            preparedStatement.setString(1, product.getName());
+            preparedStatement.setInt(2, product.getProteins());
+            preparedStatement.setInt(3, product.getFats());
+            preparedStatement.setInt(4, product.getCarbohydrates());
+            preparedStatement.setString(5, product.getType());
+            preparedStatement.executeUpdate();
+
+            var generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                product.setId(generatedKeys.getLong("id"));
+            }
+            return product;
+        }
     }
 
-    public static ProductDao getInstance(){
+    @SneakyThrows
+    public boolean delete(Long id) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(DELETE_SQL)) {
+            preparedStatement.setLong(1, id);
+            return preparedStatement.executeUpdate() > 0;
+        }
+    }
+
+    public static ProductDao getInstance() {
         return INSTANCE;
     }
 }

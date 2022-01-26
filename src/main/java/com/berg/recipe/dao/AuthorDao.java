@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AuthorDao {
+public class AuthorDao implements Dao<Long, Author> {
 
     private static final AuthorDao INSTANCE = new AuthorDao();
     private static final String DELETE_SQL = """
@@ -22,9 +22,9 @@ public class AuthorDao {
             """;
 
     private static final String SAVE_SQL = """
-           INSERT INTO author (name)
-           VALUES (?);
-            """;
+            INSERT INTO author (name)
+            VALUES (?);
+             """;
     private static final String UPDATE_SQL = """
             UPDATE author
             SET name = ?
@@ -45,7 +45,7 @@ public class AuthorDao {
     }
 
     @SneakyThrows
-    public List<Author> findAll(AuthorFilter filter){
+    public List<Author> findAll(AuthorFilter filter) {
         List<String> whereSql = new ArrayList<>();
         List<Object> parametrs = new ArrayList<>();
         parametrs.add(filter.limit());
@@ -54,65 +54,73 @@ public class AuthorDao {
                 LIMIT ?
                 OFFSET ?
                 """;
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(sql);
-        for (int i = 0; i < parametrs.size(); i++) {
-            preparedStatement.setObject(i+1, parametrs.get(i));
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(sql);
+        ) {
+            for (int i = 0; i < parametrs.size(); i++) {
+                preparedStatement.setObject(i + 1, parametrs.get(i));
+            }
+            var resultSet = preparedStatement.executeQuery();
+            List<Author> authorList = new ArrayList<>();
+            while (resultSet.next()) {
+                authorList.add(buildAuthor(resultSet));
+            }
+            return authorList;
         }
-        System.out.println(preparedStatement);
-        var resultSet = preparedStatement.executeQuery();
-        List<Author> authorList = new ArrayList<>();
-        while (resultSet.next()){
-            authorList.add(buildAuthor(resultSet));
-        }
-        return authorList;
+
     }
 
     @SneakyThrows
-    public List<Author> findAll(){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(FIND_ALL_SQL);
-        var resultSet = preparedStatement.executeQuery();
-        List<Author> authorList = new ArrayList<>();
-        while (resultSet.next()){
-            authorList.add(buildAuthor(resultSet));
+    public List<Author> findAll() {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(FIND_ALL_SQL);
+        ) {
+            var resultSet = preparedStatement.executeQuery();
+            List<Author> authorList = new ArrayList<>();
+            while (resultSet.next()) {
+                authorList.add(buildAuthor(resultSet));
+            }
+            return authorList;
         }
-        return authorList;
-    }
-    @SneakyThrows
-    public Optional<Author> findById (Long id){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL);
-        preparedStatement.setLong(1, id);
-
-        var resultSet = preparedStatement.executeQuery();
-        Author author = null;
-        if(resultSet.next()){
-            author = buildAuthor(resultSet);
-        }
-        return Optional.ofNullable(author);
     }
 
     @SneakyThrows
-    private Author buildAuthor(ResultSet resultSet){
+    public Optional<Author> findById(Long id) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL);
+        ) {
+            preparedStatement.setLong(1, id);
+
+            var resultSet = preparedStatement.executeQuery();
+            Author author = null;
+            if (resultSet.next()) {
+                author = buildAuthor(resultSet);
+            }
+            return Optional.ofNullable(author);
+        }
+    }
+
+    @SneakyThrows
+    private Author buildAuthor(ResultSet resultSet) {
         return new Author(
                 resultSet.getLong("id"),
                 resultSet.getString("name")
         );
     }
 
-    public void update (Author author){
+    @SneakyThrows
+    public void update(Author author) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setString(1, author.getName());
             preparedStatement.setLong(2, author.getId());
 
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
-    public Author save(Author author){
+
+    @SneakyThrows
+    public Author save(Author author) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, author.getName());
@@ -120,22 +128,19 @@ public class AuthorDao {
             preparedStatement.executeUpdate();
 
             var generatedKeys = preparedStatement.getGeneratedKeys();
-            if(generatedKeys.next()){
+            if (generatedKeys.next()) {
                 author.setId(generatedKeys.getLong("id"));
             }
             return author;
-        } catch (SQLException e) {
-            throw new DaoException(e);
         }
     }
 
+    @SneakyThrows
     public boolean delete(Long id) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(DELETE_SQL)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new DaoException(e);
         }
     }
 

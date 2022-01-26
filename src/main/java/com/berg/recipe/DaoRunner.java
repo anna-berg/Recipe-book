@@ -4,14 +4,9 @@ import com.berg.recipe.dao.AuthorDao;
 import com.berg.recipe.dto.AuthorFilter;
 import com.berg.recipe.entity.Author;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 public class DaoRunner {
 
     public static void main(String[] args) {
-
         var authorFilter = new AuthorFilter(10, 1);
         var authorDao = AuthorDao.getInstance();
         var authorList = authorDao.findAll(authorFilter);

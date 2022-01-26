@@ -43,28 +43,30 @@ public class CategoryRecipeDao implements Dao<Long, CategoryRecipe> {
 
     @SneakyThrows
     public List<CategoryRecipe> findAll(){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(FIND_ALL_SQL);
-        var resultSet = preparedStatement.executeQuery();
-        List<CategoryRecipe> categoryList = new ArrayList<>();
-        while (resultSet.next()){
-            categoryList.add(buildCategory(resultSet));
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(FIND_ALL_SQL)) {
+            var resultSet = preparedStatement.executeQuery();
+            List<CategoryRecipe> categoryList = new ArrayList<>();
+            while (resultSet.next()){
+                categoryList.add(buildCategory(resultSet));
+            }
+            return categoryList;
         }
-        return categoryList;
     }
 
     @SneakyThrows
     public Optional<CategoryRecipe> findById(Long id){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL);
-        preparedStatement.setLong(1, id);
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+            preparedStatement.setLong(1, id);
 
-        var resultSet = preparedStatement.executeQuery();
-        CategoryRecipe category = null;
-        if (resultSet.next()){
-            category = buildCategory(resultSet);
+            var resultSet = preparedStatement.executeQuery();
+            CategoryRecipe category = null;
+            if (resultSet.next()){
+                category = buildCategory(resultSet);
+            }
+            return Optional.ofNullable(category);
         }
-        return Optional.ofNullable(category);
     }
 
     @SneakyThrows
@@ -77,35 +79,38 @@ public class CategoryRecipeDao implements Dao<Long, CategoryRecipe> {
 
     @SneakyThrows
     public void update (CategoryRecipe categoryRecipe){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(UPDATE_SQL);
-        preparedStatement.setString(1, categoryRecipe.getCategory());
-        preparedStatement.setLong(2, categoryRecipe.getId());
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
+            preparedStatement.setString(1, categoryRecipe.getCategory());
+            preparedStatement.setLong(2, categoryRecipe.getId());
 
-        preparedStatement.executeUpdate();
+            preparedStatement.executeUpdate();
+        }
     }
 
     @SneakyThrows
     public CategoryRecipe save (CategoryRecipe categoryRecipe){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(SAVE_SQL);
-        preparedStatement.setString(1, categoryRecipe.getCategory());
-        preparedStatement.executeUpdate();
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(SAVE_SQL);
+        ) {
+            preparedStatement.setString(1, categoryRecipe.getCategory());
+            preparedStatement.executeUpdate();
 
-        var generatedKeys = preparedStatement.getGeneratedKeys();
-        if (generatedKeys.next()){
-            categoryRecipe.setId(generatedKeys.getLong("id"));
+            var generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()){
+                categoryRecipe.setId(generatedKeys.getLong("id"));
+            }
+            return categoryRecipe;
         }
-        return categoryRecipe;
-
     }
 
     @SneakyThrows
     public boolean delete (Long id){
-        var connection = ConnectionManager.get();
-        var preparedStatement = connection.prepareStatement(DELETE_SQL);
-        preparedStatement.setLong(1, id);
-        return preparedStatement.executeUpdate() > 0;
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(DELETE_SQL)) {
+            preparedStatement.setLong(1, id);
+            return preparedStatement.executeUpdate() > 0;
+        }
     }
 
     public static CategoryRecipeDao getInstance(){
