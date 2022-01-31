@@ -4,6 +4,7 @@ import com.berg.recipe.entity.DailyMenu;
 import com.berg.recipe.util.ConnectionManager;
 import lombok.SneakyThrows;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +84,7 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
             preparedStatement.setLong(3, entity.getLunch().getId());
             preparedStatement.setLong(4, entity.getSecondSnack().getId());
             preparedStatement.setLong(5, entity.getDinner().getId());
+            preparedStatement.setLong(6, entity.getId());
 
             var executeUpdate = preparedStatement.executeUpdate();
         }
@@ -92,19 +94,24 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
     public DailyMenu buildDailyMenu(ResultSet resultSet) {
         return new DailyMenu(
                 resultSet.getLong("id"),
-                recipeDao.findById(resultSet.getLong("breakfast")).orElse(null),
-                recipeDao.findById(resultSet.getLong("first_snack")).orElse(null),
-                recipeDao.findById(resultSet.getLong("lunch")).orElse(null),
-                recipeDao.findById(resultSet.getLong("second_snack")).orElse(null),
-                recipeDao.findById(resultSet.getLong("dinner")).orElse(null)
+                recipeDao.findById(resultSet.getLong("breakfast"), resultSet.getStatement().getConnection()).orElse(null),
+                recipeDao.findById(resultSet.getLong("first_snack"), resultSet.getStatement().getConnection()).orElse(null),
+                recipeDao.findById(resultSet.getLong("lunch"), resultSet.getStatement().getConnection()).orElse(null),
+                recipeDao.findById(resultSet.getLong("second_snack"), resultSet.getStatement().getConnection()).orElse(null),
+                recipeDao.findById(resultSet.getLong("dinner"), resultSet.getStatement().getConnection()).orElse(null)
         );
     }
 
     @SneakyThrows
-    @Override
     public Optional<DailyMenu> findById(Long id) {
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+        try (var connection = ConnectionManager.get()) {
+            return findById(id, connection);
+        }
+    }
+
+    @SneakyThrows
+    public Optional<DailyMenu> findById(Long id, Connection connection) {
+        try (var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             preparedStatement.setLong(1, id);
             var resultSet = preparedStatement.executeQuery();
             DailyMenu dailyMenu = null;

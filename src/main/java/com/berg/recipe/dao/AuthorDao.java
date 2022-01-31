@@ -2,12 +2,11 @@ package com.berg.recipe.dao;
 
 import com.berg.recipe.dto.AuthorFilter;
 import com.berg.recipe.entity.Author;
-import com.berg.recipe.exeption.DaoException;
 import com.berg.recipe.util.ConnectionManager;
 import lombok.SneakyThrows;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +32,7 @@ public class AuthorDao implements Dao<Long, Author> {
 
     private static final String FIND_ALL_SQL = """
             SELECT id,
-            name
+                name
             FROM author
             """;
 
@@ -84,10 +83,17 @@ public class AuthorDao implements Dao<Long, Author> {
         }
     }
 
+    @Override
     @SneakyThrows
     public Optional<Author> findById(Long id) {
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL);
+        try (var connection = ConnectionManager.get()) {
+            return findById(id, connection);
+        }
+    }
+
+    @SneakyThrows
+    public Optional<Author> findById(Long id, Connection connection) {
+        try (var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL);
         ) {
             preparedStatement.setLong(1, id);
 

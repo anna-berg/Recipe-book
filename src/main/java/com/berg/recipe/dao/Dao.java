@@ -1,5 +1,6 @@
 package com.berg.recipe.dao;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +12,7 @@ public interface Dao <K, E>{
 
     void update (E entity);
 
-    Optional<E> findById(K id);
+    Optional<E> findById(Long id);
 
     List<E> findAll();
 }

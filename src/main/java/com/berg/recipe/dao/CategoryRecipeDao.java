@@ -4,6 +4,7 @@ import com.berg.recipe.entity.CategoryRecipe;
 import com.berg.recipe.util.ConnectionManager;
 import lombok.SneakyThrows;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +56,8 @@ public class CategoryRecipeDao implements Dao<Long, CategoryRecipe> {
     }
 
     @SneakyThrows
-    public Optional<CategoryRecipe> findById(Long id){
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+    public Optional<CategoryRecipe> findById(Long id, Connection connection){
+        try (var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             preparedStatement.setLong(1, id);
 
             var resultSet = preparedStatement.executeQuery();
@@ -66,6 +66,13 @@ public class CategoryRecipeDao implements Dao<Long, CategoryRecipe> {
                 category = buildCategory(resultSet);
             }
             return Optional.ofNullable(category);
+        }
+    }
+
+    @SneakyThrows
+    public Optional<CategoryRecipe> findById(Long id){
+        try (var connection = ConnectionManager.get()) {
+            return findById(id, connection);
         }
     }
 

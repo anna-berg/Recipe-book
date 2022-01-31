@@ -11,13 +11,10 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class CategoryRecipe {
+public class GroupDay {
 
     private Long id;
-    private String category;
-
-    public static class Grouped {
-
-
-    }
+    private Grouped group;
+    private DailyMenu dailyMenu;
+    private int position;
 }

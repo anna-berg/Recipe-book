@@ -4,6 +4,7 @@ import com.berg.recipe.entity.Product;
 import com.berg.recipe.util.ConnectionManager;
 import lombok.SneakyThrows;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +66,14 @@ public class ProductDao implements Dao<Long, Product> {
 
     @SneakyThrows
     public Optional<Product> findById(Long id) {
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+        try (var connection = ConnectionManager.get()) {
+            return findById(id, connection);
+        }
+    }
+
+    @SneakyThrows
+    public Optional<Product> findById(Long id, Connection connection) {
+        try (var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             preparedStatement.setLong(1, id);
 
             var resultSet = preparedStatement.executeQuery();
@@ -100,6 +107,7 @@ public class ProductDao implements Dao<Long, Product> {
             preparedStatement.setInt(3, product.getFats());
             preparedStatement.setInt(4, product.getCarbohydrates());
             preparedStatement.setString(5, product.getType());
+            preparedStatement.setLong(6, product.getId());
 
             preparedStatement.executeUpdate();
         }

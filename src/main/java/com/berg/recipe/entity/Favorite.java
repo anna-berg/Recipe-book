@@ -6,18 +6,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
-public class CategoryRecipe {
+public class Favorite {
 
     private Long id;
-    private String category;
-
-    public static class Grouped {
-
-
-    }
+    private User user;
+    private DailyMenu dailyMenus;
+    private Recipe recipes;
+    private int rating;
+    private LocalDateTime createdAt;
 }

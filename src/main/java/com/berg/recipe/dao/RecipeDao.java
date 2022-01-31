@@ -1,10 +1,10 @@
 package com.berg.recipe.dao;
 
-import com.berg.recipe.entity.Author;
 import com.berg.recipe.entity.Recipe;
 import com.berg.recipe.util.ConnectionManager;
 import lombok.SneakyThrows;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +53,9 @@ public class RecipeDao implements Dao<Long, Recipe> {
     private RecipeDao() {
     }
 
+
+    // add products
+    //(Recipe recipe, Products p..., ) + sql который сделает инсерт продуктов в RecipeProduct
     @SneakyThrows
     @Override
     public boolean delete(Long id) {
@@ -94,6 +97,7 @@ public class RecipeDao implements Dao<Long, Recipe> {
             preparedStatement.setString(3, entity.getDescription());
             preparedStatement.setString(4, entity.getMeasure());
             preparedStatement.setLong(5, entity.getCategoryRecipe().getId());
+            preparedStatement.setLong(6, entity.getId());
 
             var resultSet = preparedStatement.executeUpdate();
         }
@@ -104,18 +108,24 @@ public class RecipeDao implements Dao<Long, Recipe> {
         return new Recipe(
                 resultSet.getLong("id"),
                 resultSet.getString("title"),
-                authorDao.findById(resultSet.getLong("author_id")).orElse(null),
+                authorDao.findById(resultSet.getLong("author_id"), resultSet.getStatement().getConnection()).orElse(null),
                 resultSet.getString("description"),
                 resultSet.getString("measure"),
-                categoryRecipeDao.findById(resultSet.getLong("category_id")).orElse(null)
+                categoryRecipeDao.findById(resultSet.getLong("category_id"), resultSet.getStatement().getConnection()).orElse(null)
         );
     }
 
     @SneakyThrows
     @Override
     public Optional<Recipe> findById(Long id) {
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+        try (var connection = ConnectionManager.get()) {
+            return findById(id, connection);
+        }
+    }
+
+    @SneakyThrows
+    public Optional<Recipe> findById(Long id, Connection connection) {
+        try (var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             preparedStatement.setLong(1, id);
             var resultSet = preparedStatement.executeQuery();
             Recipe recipe = null;

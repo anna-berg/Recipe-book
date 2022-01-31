@@ -1,5 +1,6 @@
 package com.berg.recipe.entity;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,13 +12,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class CategoryRecipe {
+public class Grouped {
 
     private Long id;
-    private String category;
-
-    public static class Grouped {
-
-
-    }
+    private User user;
+    private String groupTitle;
 }
