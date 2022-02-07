@@ -1,6 +1,7 @@
 package com.berg.recipe.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,10 +14,10 @@ import lombok.ToString;
 @ToString
 public class Recipe {
 
-    private Long id;
-    private String title;
-    private Author author;
-    private String description;
-    private String measure;
-    private CategoryRecipe categoryRecipe;
+    private  Long id;
+    private  String title;
+    private  Author author;
+    private  String description;
+    private  String measure;
+    private  CategoryRecipe categoryRecipe;
 }
