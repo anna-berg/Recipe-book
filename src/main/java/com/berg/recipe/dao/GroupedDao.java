@@ -1,6 +1,5 @@
 package com.berg.recipe.dao;
 
-import com.berg.recipe.entity.GroupDay;
 import com.berg.recipe.entity.Grouped;
 import com.berg.recipe.util.ConnectionManager;
 import lombok.SneakyThrows;
@@ -46,7 +45,6 @@ public class GroupedDao implements Dao<Long, Grouped> {
     private GroupedDao() {
     }
 
-    private final GroupedDao groupedDao = GroupedDao.getInstance();
     private final UserDao userDao = UserDao.getInstance();
 
     @SneakyThrows

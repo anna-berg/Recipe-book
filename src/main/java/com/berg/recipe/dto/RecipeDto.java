@@ -1,12 +1,20 @@
 package com.berg.recipe.dto;
 
-import com.berg.recipe.entity.CategoryRecipe;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Value;
 
+import java.util.List;
+
 @Value
+@Builder
+@AllArgsConstructor
 public class RecipeDto {
 
-    private Long id;
-    private CategoryRecipe categoryRecipe;
-    private String title;
+    Long id;
+    CategoryRecipeDto categoryRecipeDto;
+    AuthorDto authorDto;
+    String description;
+    String title;
+    List<ProductDto> products;
 }

@@ -46,7 +46,28 @@ public class ProductDao implements Dao<Long, Product> {
             WHERE id = ?;
             """;
 
+    private static final String FIND_PRODUCTS_BY_RECIPE = """
+            SELECT product_id
+            FROM recipe_product
+            WHERE recipe_id = ?
+            """;
+
     private ProductDao() {
+    }
+
+    @SneakyThrows
+    public List<Product> findProductByRecipe(Long recipeId) {
+        List<Product> products = new ArrayList<>();
+        try (var connection = ConnectionManager.get()) {
+            var preparedStatement = connection.prepareStatement(FIND_PRODUCTS_BY_RECIPE);
+            preparedStatement.setLong(1, recipeId);
+            var resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                var productId = resultSet.getLong("product_id");
+                findById(productId).ifPresent(products::add);
+            }
+        }
+        return products;
     }
 
     @SneakyThrows
@@ -61,8 +82,6 @@ public class ProductDao implements Dao<Long, Product> {
             return productList;
         }
     }
-
-//todo сделать запрос - вернуть все продукты по recipe_id
 
     @SneakyThrows
     public Optional<Product> findById(Long id) {

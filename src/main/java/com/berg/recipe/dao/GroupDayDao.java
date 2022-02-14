@@ -44,7 +44,7 @@ public class GroupDayDao implements Dao<Long, GroupDay> {
             WHERE id = ?;
             """;
 
-    private GroupDayDao(){
+    private GroupDayDao() {
     }
 
     private final GroupedDao groupedDao = GroupedDao.getInstance();
@@ -57,7 +57,8 @@ public class GroupDayDao implements Dao<Long, GroupDay> {
              var preparedStatement = connection.prepareStatement(DELETE_SQL)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
-        }    }
+        }
+    }
 
     @SneakyThrows
     @Override
@@ -76,7 +77,8 @@ public class GroupDayDao implements Dao<Long, GroupDay> {
                 entity.setId(generatedKeys.getLong("id"));
             }
             return entity;
-        }    }
+        }
+    }
 
     @SneakyThrows
     @Override
@@ -95,12 +97,12 @@ public class GroupDayDao implements Dao<Long, GroupDay> {
     }
 
     @SneakyThrows
-    public GroupDay buildGroupDay (ResultSet resultSet){
+    public GroupDay buildGroupDay(ResultSet resultSet) {
         return new GroupDay(
-            resultSet.getLong("id"),
-            groupedDao.findById(resultSet.getLong("group_id"), resultSet.getStatement().getConnection()).orElse(null),
-            dailyMenuDao.findById(resultSet.getLong("daily_menu_id"), resultSet.getStatement().getConnection()).orElse(null),
-            resultSet.getInt("position")
+                resultSet.getLong("id"),
+                groupedDao.findById(resultSet.getLong("group_id"), resultSet.getStatement().getConnection()).orElse(null),
+                dailyMenuDao.findById(resultSet.getLong("daily_menu_id"), resultSet.getStatement().getConnection()).orElse(null),
+                resultSet.getInt("position")
         );
     }
 
@@ -122,7 +124,8 @@ public class GroupDayDao implements Dao<Long, GroupDay> {
     public Optional<GroupDay> findById(Long id) {
         try (var connection = ConnectionManager.get()) {
             return findById(id, connection);
-        }    }
+        }
+    }
 
     @SneakyThrows
     @Override

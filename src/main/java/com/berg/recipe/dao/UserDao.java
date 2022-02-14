@@ -1,5 +1,6 @@
 package com.berg.recipe.dao;
 
+import com.berg.recipe.entity.Role;
 import com.berg.recipe.entity.User;
 import com.berg.recipe.util.ConnectionManager;
 import lombok.SneakyThrows;
@@ -9,6 +10,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class UserDao implements Dao<Long, User> {
 
@@ -20,8 +23,8 @@ public class UserDao implements Dao<Long, User> {
             """;
 
     private static final String SAVE_SQL = """
-            INSERT INTO users(name, email, password, role)
-            VALUES (?, ?, ?, ?);
+            INSERT INTO users(name, email, password, role, gender)
+            VALUES (?, ?, ?, ?, ?);
              """;
 
     private static final String UPDATE_SQL = """
@@ -53,15 +56,16 @@ public class UserDao implements Dao<Long, User> {
     @Override
     public User save(User entity) {
         try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(SAVE_SQL)) {
+             var preparedStatement = connection.prepareStatement(SAVE_SQL, RETURN_GENERATED_KEYS)) {
             preparedStatement.setObject(1, entity.getName());
             preparedStatement.setObject(2, entity.getEMail());
             preparedStatement.setObject(3, entity.getPassword());
             preparedStatement.setObject(4, entity.getRole());
+            preparedStatement.setObject(5, entity.getGender());
 
             preparedStatement.executeUpdate();
             var generatedKeys = preparedStatement.getGeneratedKeys();
-            if(generatedKeys.next()){
+            if (generatedKeys.next()) {
                 entity.setId(generatedKeys.getLong("id"));
             }
             return entity;
@@ -94,14 +98,14 @@ public class UserDao implements Dao<Long, User> {
     }
 
     @SneakyThrows
-    public User buildUser(ResultSet resultSet){
-        return new User(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("email"),
-                resultSet.getString("password"),
-                resultSet.getString("role")
-        );
+    public User buildUser(ResultSet resultSet) {
+        return User.builder()
+                .id(resultSet.getLong("id"))
+                .name(resultSet.getString("name"))
+                .eMail(resultSet.getString("email"))
+                .password(resultSet.getString("password"))
+                .role(Role.valueOf(resultSet.getString("role")))
+                .build();
     }
 
     @SneakyThrows
@@ -114,7 +118,8 @@ public class UserDao implements Dao<Long, User> {
                 user = buildUser(resultSet);
             }
             return Optional.ofNullable(user);
-        }    }
+        }
+    }
 
     @SneakyThrows
     @Override
@@ -138,7 +143,7 @@ public class UserDao implements Dao<Long, User> {
         }
     }
 
-    public static UserDao getInstance(){
-        return  INSTANCE;
+    public static UserDao getInstance() {
+        return INSTANCE;
     }
 }

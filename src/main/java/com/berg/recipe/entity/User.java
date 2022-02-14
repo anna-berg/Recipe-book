@@ -1,22 +1,20 @@
 package com.berg.recipe.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-@AllArgsConstructor
+@Data
+@Builder
 @NoArgsConstructor
-@Getter
-@Setter
-@ToString
+@AllArgsConstructor
 public class User {
 
     private Long id;
     private String name;
     private String eMail;
     private String password;
-    private String role;
+    private Role role;
+    private Gender gender;
 }

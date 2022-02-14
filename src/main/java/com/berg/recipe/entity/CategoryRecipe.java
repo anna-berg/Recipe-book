@@ -15,9 +15,4 @@ public class CategoryRecipe {
 
     private Long id;
     private String category;
-
-    public static class Grouped {
-
-
-    }
 }

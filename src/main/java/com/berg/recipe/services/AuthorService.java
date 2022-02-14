@@ -1,9 +1,12 @@
 package com.berg.recipe.services;
 
 import com.berg.recipe.dao.AuthorDao;
-import com.berg.recipe.entity.Author;
+import com.berg.recipe.dto.AuthorDto;
 
 import java.util.List;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 public class AuthorService {
 
@@ -13,15 +16,19 @@ public class AuthorService {
     private AuthorService() {
     }
 
-    public Author findAuthorById (Long authorId){
-        return authorDao.findById(authorId).orElse(null);
+    public Optional<AuthorDto> findAuthorById(Long authorId) {
+        return authorDao.findById(authorId).stream()
+                .map(author -> new AuthorDto(author.getId(), author.getName()))
+                .findAny();
     }
 
     public static AuthorService getInstance() {
         return INSTANCE;
     }
 
-    public List<Author> findAll() {
-        return authorDao.findAll();
+    public List<AuthorDto> findAll() {
+        return authorDao.findAll().stream()
+                .map(author -> new AuthorDto(author.getId(), author.getName()))
+                .collect(toList());
     }
 }

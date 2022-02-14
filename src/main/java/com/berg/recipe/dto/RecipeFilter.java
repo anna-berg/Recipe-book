@@ -1,8 +1,14 @@
 package com.berg.recipe.dto;
 
-public record RecipeFilter(int limit,
-                           int offset,
-                           Long recipeId,
-                           Long authorId,
-                           Long categoryId) {
+import lombok.Builder;
+import lombok.Value;
+
+@Value
+@Builder
+public class RecipeFilter {
+    int limit;
+    int offset;
+    Long recipeId;
+    Long authorId;
+    Long categoryId;
 }

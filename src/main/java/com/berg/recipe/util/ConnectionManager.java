@@ -1,5 +1,7 @@
 package com.berg.recipe.util;
 
+import lombok.experimental.UtilityClass;
+
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,6 +11,8 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+
+@UtilityClass
 public final class ConnectionManager {
 
     private static final String USERNAME_KEY = "db.username";
@@ -26,7 +30,7 @@ public final class ConnectionManager {
     }
 
     private static void initConnectionPool() {
-        final var poolSize = PropertiesUtil.get(POOL_SIZE);
+        var poolSize = PropertiesUtil.get(POOL_SIZE);
         var size = poolSize == null ? DEFAULT_POOL_SIZE : Integer.parseInt(poolSize);
         pool = new ArrayBlockingQueue<>(size);
         sourceConnections = new ArrayList<>(size);
@@ -42,7 +46,7 @@ public final class ConnectionManager {
         }
     }
 
-    public static Connection get (){
+    public static Connection get() {
         try {
             return pool.take();
         } catch (InterruptedException e) {
@@ -50,9 +54,7 @@ public final class ConnectionManager {
         }
     }
 
-    private ConnectionManager() {
-    }
-    private static Connection open () {
+    private static Connection open() {
         try {
             return DriverManager.getConnection(
                     PropertiesUtil.get(URL_KEY),

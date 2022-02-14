@@ -106,7 +106,7 @@ public class FavoriteDao implements Dao<Long, Favorite> {
 
     @SneakyThrows
     public Optional<Favorite> findById(Long id, Connection connection) {
-        try ( var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+        try (var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             preparedStatement.setLong(1, id);
             var resultSet = preparedStatement.executeQuery();
             Favorite favorite = null;

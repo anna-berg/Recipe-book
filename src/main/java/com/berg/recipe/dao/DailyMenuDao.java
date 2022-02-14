@@ -20,8 +20,8 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
             """;
 
     private static final String SAVE_SQL = """
-            INSERT INTO daily_menu(breakfast, first_snack, lunch, second_snack, dinner)
-            VALUES (?, ?, ?, ?, ?);
+            INSERT INTO daily_menu(breakfast, first_snack, lunch, second_snack, dinner, title)
+            VALUES (?, ?, ?, ?, ?, ?);
              """;
 
     private static final String UPDATE_SQL = """
@@ -30,7 +30,8 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
                 first_snack = ?,
                 lunch = ?,
                 second_snack = ?, 
-                dinner = ?
+                dinner = ?,
+                title = ?
             WHERE id = ?
             """;
 
@@ -40,7 +41,8 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
                 first_snack,
                 lunch,
                 second_snack,
-                dinner
+                dinner,
+                title
             FROM daily_menu
             """;
 
@@ -63,6 +65,7 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
             preparedStatement.setLong(3, dailyMenu.getLunch().getId());
             preparedStatement.setLong(4, dailyMenu.getSecondSnack().getId());
             preparedStatement.setLong(5, dailyMenu.getDinner().getId());
+            preparedStatement.setString(6, dailyMenu.getTitle());
 
             preparedStatement.executeUpdate();
 
@@ -78,13 +81,14 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
     @Override
     public void update(DailyMenu entity) {
         try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+             var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setLong(1, entity.getBreakfast().getId());
             preparedStatement.setLong(2, entity.getFirstSnack().getId());
             preparedStatement.setLong(3, entity.getLunch().getId());
             preparedStatement.setLong(4, entity.getSecondSnack().getId());
             preparedStatement.setLong(5, entity.getDinner().getId());
-            preparedStatement.setLong(6, entity.getId());
+            preparedStatement.setString(6, entity.getTitle());
+            preparedStatement.setLong(7, entity.getId());
 
             var executeUpdate = preparedStatement.executeUpdate();
         }
@@ -98,7 +102,8 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
                 recipeDao.findById(resultSet.getLong("first_snack"), resultSet.getStatement().getConnection()).orElse(null),
                 recipeDao.findById(resultSet.getLong("lunch"), resultSet.getStatement().getConnection()).orElse(null),
                 recipeDao.findById(resultSet.getLong("second_snack"), resultSet.getStatement().getConnection()).orElse(null),
-                recipeDao.findById(resultSet.getLong("dinner"), resultSet.getStatement().getConnection()).orElse(null)
+                recipeDao.findById(resultSet.getLong("dinner"), resultSet.getStatement().getConnection()).orElse(null),
+                resultSet.getString("title")
         );
     }
 
@@ -135,7 +140,6 @@ public class DailyMenuDao implements Dao<Long, DailyMenu> {
             return dailyMenus;
         }
     }
-
 
     @SneakyThrows
     public boolean delete(Long id) {

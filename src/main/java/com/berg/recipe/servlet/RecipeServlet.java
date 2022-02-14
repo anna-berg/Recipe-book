@@ -1,43 +1,52 @@
 package com.berg.recipe.servlet;
 
-import com.berg.recipe.dao.RecipeDao;
-import com.berg.recipe.entity.Recipe;
+import com.berg.recipe.dto.RecipeDto;
 import com.berg.recipe.services.RecipeService;
+import com.berg.recipe.util.JspHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @WebServlet("/recipe")
 public class RecipeServlet extends HttpServlet {
 
-    RecipeService recipeService = RecipeService.getInstance();
+    private final RecipeService recipeService = RecipeService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        var recipeId = Long.valueOf(req.getParameter("recipeId"));
-        resp.setContentType("text/html");
-        resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        var recipeId = Optional.ofNullable(req.getParameter("recipeId"))
+                .map(Long::valueOf)
+                .orElse(null);
 
-        try (var writer = resp.getWriter()) {
-            var recipe = recipeService.findById(recipeId);
-
-            writer.write("<h1>" + recipe.getTitle() + "</h1>");
-            writer.write("<h3>" + recipe.getCategoryRecipe().getCategory() + " , " + recipe.getAuthor().getName() + "</h3>");
-            writer.write(recipe.getDescription());
-            writer.write("<h3> Продукты: </h3>");
-            writer.write("<ul>");
-            recipeService.findProductsByRecipe(recipeId).forEach(product -> writer.write("""
-                    <li>
-                        %s
-                    </li>
-                    """.formatted(product.getName())));
-            writer.write("</ul>");
+        if (recipeId == null) {
+            req.setAttribute("recipeList", recipeService.findAll());
+            req.getRequestDispatcher(JspHelper.getPath("recipe"))
+                    .forward(req, resp);
         }
+        recipeService.findById(recipeId)
+                .ifPresentOrElse(recipe -> successResponse(req, resp, recipe), () -> errorResponse(req, resp));
+
+    }
+
+    @SneakyThrows
+    private void errorResponse(HttpServletRequest req, HttpServletResponse resp) {
+        String message = "No such recipe";
+        req.setAttribute("message", message);
+        req.getRequestDispatcher(JspHelper.getPath("recipe"))
+                .forward(req, resp);
+    }
+
+    @SneakyThrows
+    private void successResponse(HttpServletRequest req, HttpServletResponse resp, RecipeDto recipe) {
+        req.setAttribute("recipe", recipe);
+        req.setAttribute("productList", recipeService.findProductsByRecipe(recipe.getId()));
+        req.getRequestDispatcher(JspHelper.getPath("recipe"))
+                .forward(req, resp);
     }
 }
