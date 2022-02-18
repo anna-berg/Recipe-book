@@ -39,7 +39,7 @@ public class ProductDao implements Dao<Long, Product> {
                 fats,
                 carbohydrates,
                 type
-            FROM recipe_book.public.product
+            FROM product
             """;
 
     private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + """
@@ -47,9 +47,17 @@ public class ProductDao implements Dao<Long, Product> {
             """;
 
     private static final String FIND_PRODUCTS_BY_RECIPE = """
-            SELECT product_id
-            FROM recipe_product
-            WHERE recipe_id = ?
+            SELECT  
+                p.id,
+                p.name,
+                p.proteins,
+                p.fats,
+                p.carbohydrates,
+                p.type
+            FROM recipe_product rp
+            JOIN product p 
+                ON p.id = rp.product_id
+            WHERE rp.recipe_id = ?
             """;
 
     private ProductDao() {
@@ -63,8 +71,7 @@ public class ProductDao implements Dao<Long, Product> {
             preparedStatement.setLong(1, recipeId);
             var resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                var productId = resultSet.getLong("product_id");
-                findById(productId).ifPresent(products::add);
+                products.add(buildProduct(resultSet));
             }
         }
         return products;

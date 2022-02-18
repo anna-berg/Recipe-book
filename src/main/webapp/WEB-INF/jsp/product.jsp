@@ -7,6 +7,8 @@
     <title>Product</title>
 </head>
 <body>
+<%@include file="header.jsp"%>
+
 <c:choose>
     <c:when test="${not empty requestScope.productList}">
         <h1>Список всех продуктов: </h1>

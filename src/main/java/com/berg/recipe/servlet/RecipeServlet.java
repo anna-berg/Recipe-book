@@ -1,8 +1,9 @@
 package com.berg.recipe.servlet;
 
 import com.berg.recipe.dto.RecipeDto;
-import com.berg.recipe.services.RecipeService;
+import com.berg.recipe.service.RecipeService;
 import com.berg.recipe.util.JspHelper;
+import com.berg.recipe.util.UrlPath;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,7 +14,7 @@ import lombok.SneakyThrows;
 import java.io.IOException;
 import java.util.Optional;
 
-@WebServlet("/recipe")
+@WebServlet(UrlPath.REGISTRATION)
 public class RecipeServlet extends HttpServlet {
 
     private final RecipeService recipeService = RecipeService.getInstance();
@@ -31,13 +32,11 @@ public class RecipeServlet extends HttpServlet {
         }
         recipeService.findById(recipeId)
                 .ifPresentOrElse(recipe -> successResponse(req, resp, recipe), () -> errorResponse(req, resp));
-
     }
 
     @SneakyThrows
     private void errorResponse(HttpServletRequest req, HttpServletResponse resp) {
-        String message = "No such recipe";
-        req.setAttribute("message", message);
+        req.setAttribute("message", "No such recipe");
         req.getRequestDispatcher(JspHelper.getPath("recipe"))
                 .forward(req, resp);
     }

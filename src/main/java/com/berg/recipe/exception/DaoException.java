@@ -1,4 +1,4 @@
-package com.berg.recipe.exeption;
+package com.berg.recipe.exception;
 
 public class DaoException extends RuntimeException {
 

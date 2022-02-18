@@ -1,4 +1,4 @@
-package com.berg.recipe.services;
+package com.berg.recipe.service;
 
 import com.berg.recipe.dao.DailyMenuDao;
 import com.berg.recipe.dto.AuthorDto;
@@ -12,12 +12,17 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
-public class DailyMenuServices {
+public class DailyMenuService {
 
-    private static final DailyMenuServices INSTANCE = new DailyMenuServices();
+    private static final DailyMenuService INSTANCE = new DailyMenuService();
     private final DailyMenuDao dailyMenuDao = DailyMenuDao.getInstance();
+    private final ProductService productService = ProductService.getInstance();
+    
+    private DailyMenuService() {
+    }
 
-    private DailyMenuServices() {
+    public static DailyMenuService getInstance() {
+        return INSTANCE;
     }
 
     public List<DailyMenuDto> findAll() {
@@ -34,10 +39,6 @@ public class DailyMenuServices {
                 .collect(toList());
     }
 
-    public static DailyMenuServices getInstance() {
-        return INSTANCE;
-    }
-
     public Optional<DailyMenuDto> findById(Long dailyMenuId) {
         return dailyMenuDao.findById(dailyMenuId)
                 .map(dailyMenu -> DailyMenuDto.builder()
@@ -50,7 +51,7 @@ public class DailyMenuServices {
                         .build());
     }
 
-    private static RecipeDto buildRecipeDto(Recipe recipe) {
+    private RecipeDto buildRecipeDto(Recipe recipe) {
         return RecipeDto.builder()
                 .id(recipe.getId())
                 .categoryRecipeDto(CategoryRecipeDto.builder()
@@ -61,7 +62,7 @@ public class DailyMenuServices {
                         recipe.getAuthor().getName()))
                 .description(recipe.getDescription())
                 .title(recipe.getTitle())
-                .products(ProductService.getInstance().findProductsByRecipe(recipe.getId()))
+                .products(productService.findProductsByRecipe(recipe.getId()))
                 .build();
     }
 }

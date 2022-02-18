@@ -1,7 +1,7 @@
 package com.berg.recipe.servlet;
 
 import com.berg.recipe.dto.ProductDto;
-import com.berg.recipe.services.ProductService;
+import com.berg.recipe.service.ProductService;
 import com.berg.recipe.util.JspHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,7 +16,7 @@ import java.util.Optional;
 @WebServlet("/product")
 public class ProductServlet extends HttpServlet {
 
-    ProductService productService = ProductService.getInstance();
+     private final ProductService productService = ProductService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -37,8 +37,7 @@ public class ProductServlet extends HttpServlet {
 
     @SneakyThrows
     private void errorResponse(HttpServletRequest req, HttpServletResponse resp) {
-        String message = "No such product";
-        req.setAttribute("message", message);
+        req.setAttribute("message", "No such product");
         req.getRequestDispatcher(JspHelper.getPath("product"))
                 .forward(req, resp);
     }

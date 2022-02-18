@@ -1,5 +1,6 @@
 package com.berg.recipe.dao;
 
+import com.berg.recipe.entity.Gender;
 import com.berg.recipe.entity.Role;
 import com.berg.recipe.entity.User;
 import com.berg.recipe.util.ConnectionManager;
@@ -7,6 +8,7 @@ import lombok.SneakyThrows;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,12 @@ public class UserDao implements Dao<Long, User> {
             WHERE id = ?;
             """;
 
+    private static final String GET_BY_LOGIN_AND_PASSWORD = """
+            SELECT *
+            FROM users
+            WHERE email = ? AND password = ?
+            """;
+
     private UserDao() {
     }
 
@@ -60,8 +68,8 @@ public class UserDao implements Dao<Long, User> {
             preparedStatement.setObject(1, entity.getName());
             preparedStatement.setObject(2, entity.getEMail());
             preparedStatement.setObject(3, entity.getPassword());
-            preparedStatement.setObject(4, entity.getRole());
-            preparedStatement.setObject(5, entity.getGender());
+            preparedStatement.setObject(4, entity.getRole().name());
+            preparedStatement.setObject(5, entity.getGender().name());
 
             preparedStatement.executeUpdate();
             var generatedKeys = preparedStatement.getGeneratedKeys();
@@ -130,6 +138,23 @@ public class UserDao implements Dao<Long, User> {
     }
 
     @SneakyThrows
+    public Optional<User> findByLoginAndPassword(String email, String password) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(GET_BY_LOGIN_AND_PASSWORD)) {
+
+            preparedStatement.setString(1, email);
+            preparedStatement.setString(2, password);
+
+            var resultSet = preparedStatement.executeQuery();
+            User user = null;
+            if (resultSet.next()){
+                user = buildEntity(resultSet);
+            }
+            return Optional.ofNullable(user);
+        }
+    }
+
+    @SneakyThrows
     @Override
     public List<User> findAll() {
         try (var connection = ConnectionManager.get();
@@ -146,4 +171,16 @@ public class UserDao implements Dao<Long, User> {
     public static UserDao getInstance() {
         return INSTANCE;
     }
+
+    private User buildEntity(ResultSet resultSet) throws SQLException {
+        return User.builder()
+                .id(resultSet.getObject("id", Long.class))
+                .name(resultSet.getObject("name", String.class))
+                .eMail(resultSet.getObject("email", String.class))
+                .password(resultSet.getObject("password", String.class))
+                .role(Role.valueOf(resultSet.getObject("role", String.class)))
+                .gender(Gender.valueOf(resultSet.getObject("gender", String.class)))
+                .build();
+    }
+
 }

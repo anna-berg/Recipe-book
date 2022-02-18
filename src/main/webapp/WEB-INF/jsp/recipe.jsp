@@ -7,6 +7,7 @@
     <title>Recipe</title>
 </head>
 <body>
+<%@include file="header.jsp"%>
 <c:choose>
     <c:when test="${not empty requestScope.recipeList}">
         <h1>Список рецептов: </h1>

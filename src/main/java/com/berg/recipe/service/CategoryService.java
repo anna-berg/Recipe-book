@@ -1,4 +1,4 @@
-package com.berg.recipe.services;
+package com.berg.recipe.service;
 
 import com.berg.recipe.dao.CategoryRecipeDao;
 import com.berg.recipe.dto.CategoryRecipeDto;

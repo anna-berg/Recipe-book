@@ -7,6 +7,8 @@
     <title>Category</title>
 </head>
 <body>
+<%@include file="header.jsp"%>
+
 <c:choose>
     <c:when test="${not empty requestScope.categoryList}">
         <h1>Список категорий:</h1>

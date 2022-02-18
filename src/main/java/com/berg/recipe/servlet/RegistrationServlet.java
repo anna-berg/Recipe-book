@@ -1,7 +1,10 @@
 package com.berg.recipe.servlet;
 
 import com.berg.recipe.dto.CreateUserDto;
-import com.berg.recipe.services.UserService;
+import com.berg.recipe.entity.Gender;
+import com.berg.recipe.entity.Role;
+import com.berg.recipe.exception.ValidationException;
+import com.berg.recipe.service.UserService;
 import com.berg.recipe.util.JspHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/registration")
 public class RegistrationServlet extends HttpServlet {
@@ -19,8 +21,9 @@ public class RegistrationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setAttribute("roles", List.of("MALE", "FEMALE"));
-        req.setAttribute("gender", List.of("USER", "ADMIN"));
+        req.setAttribute("roles", Role.values());
+        req.setAttribute("gender", Gender.values());
+
         req.getRequestDispatcher(JspHelper.getPath("registration"))
                 .forward(req, resp);
     }
@@ -35,7 +38,12 @@ public class RegistrationServlet extends HttpServlet {
                 .gender(req.getParameter("gender"))
                 .build();
 
-        userService.create(userDto);
-        resp.sendRedirect("/login");
+        try {
+            userService.create(userDto);
+            resp.sendRedirect("/login");
+        } catch (ValidationException validationException){
+            req.setAttribute("errors", validationException.getErrors());
+            doGet(req, resp);
+        }
     }
 }

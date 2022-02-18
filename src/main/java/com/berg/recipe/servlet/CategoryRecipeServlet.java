@@ -2,8 +2,8 @@ package com.berg.recipe.servlet;
 
 import com.berg.recipe.dto.CategoryRecipeDto;
 import com.berg.recipe.dto.RecipeFilter;
-import com.berg.recipe.services.CategoryService;
-import com.berg.recipe.services.RecipeService;
+import com.berg.recipe.service.CategoryService;
+import com.berg.recipe.service.RecipeService;
 import com.berg.recipe.util.JspHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -41,8 +41,7 @@ public class CategoryRecipeServlet extends HttpServlet {
 
     @SneakyThrows
     private void errorResponse(HttpServletRequest req, HttpServletResponse resp) {
-        String message = "No such category";
-        req.setAttribute("message", message);
+        req.setAttribute("message", "No such category");
         req.getRequestDispatcher(JspHelper.getPath("category"))
                 .forward(req, resp);
     }

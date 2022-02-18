@@ -7,6 +7,7 @@
     <title>Daily Menu</title>
 </head>
 <body>
+<%@include file="header.jsp"%>
 <c:choose>
     <c:when test="${not empty requestScope.dailyMenuList}">
         <h1>Список рецептов: </h1>

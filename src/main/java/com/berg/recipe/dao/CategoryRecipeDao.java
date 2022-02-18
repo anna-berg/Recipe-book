@@ -85,29 +85,29 @@ public class CategoryRecipeDao implements Dao<Long, CategoryRecipe> {
     }
 
     @SneakyThrows
-    public void update(CategoryRecipe categoryRecipeDto) {
+    public void update(CategoryRecipe categoryRecipe) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
-            preparedStatement.setString(1, categoryRecipeDto.getCategory());
-            preparedStatement.setLong(2, categoryRecipeDto.getId());
+            preparedStatement.setString(1, categoryRecipe.getCategory());
+            preparedStatement.setLong(2, categoryRecipe.getId());
 
             preparedStatement.executeUpdate();
         }
     }
 
     @SneakyThrows
-    public CategoryRecipe save(CategoryRecipe categoryRecipeDto) {
+    public CategoryRecipe save(CategoryRecipe categoryRecipe) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(SAVE_SQL);
         ) {
-            preparedStatement.setString(1, categoryRecipeDto.getCategory());
+            preparedStatement.setString(1, categoryRecipe.getCategory());
             preparedStatement.executeUpdate();
 
             var generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
-                categoryRecipeDto.setId(generatedKeys.getLong("id"));
+                categoryRecipe.setId(generatedKeys.getLong("id"));
             }
-            return categoryRecipeDto;
+            return categoryRecipe;
         }
     }
 

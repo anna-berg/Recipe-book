@@ -6,6 +6,8 @@
     <title>Authors</title>
 </head>
 <body>
+<%@include file="header.jsp"%>
+
 <h1>Список авторов:</h1>
 <ul>
     <c:forEach var="author" items="${requestScope.author}">
